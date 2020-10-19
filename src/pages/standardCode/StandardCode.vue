@@ -46,13 +46,13 @@
               :search="search"
               hide-actions
             >-->
-
+<!-- class="elevation-1" -->
             <v-data-table
               :headers="headers"
               :items="tableData"
               :pagination.sync="pagination"
               :total-items="totalBrands"
-              class="elevation-1"
+              
             >
               <template v-slot:items="tableData">
                 <td class="text-xs-center">{{ tableData.index + 1 }}</td>
@@ -169,6 +169,7 @@ export default {
     pagination: {
       deep: true, //深度監控
       handler() {
+        // debugger;
         this.getTable();
       }
     }
@@ -205,9 +206,10 @@ export default {
     getTable() {
       let obj = {
         pagenum: this.pagination.page,
-        size: this.pagination.rowsPerPage
+        size: this.pagination.rowsPerPage,
+        key: this.search,
       };
-      this.$nohttps
+        this.$nohttps
         .post("/codeinfo/getCodeInfoListByPage", obj)
         .then(res => {
           let data = res.data.data;
@@ -241,6 +243,7 @@ export default {
           .then(res => {
             if (res.data.resultCode === "RESULT_SUCCESS") {
               this.showSnackbar("申请成功", "success");
+              debugger;
               this.getTable();
             } else {
               this.showSnackbar("申请失败", "error");
@@ -381,6 +384,7 @@ export default {
           .then(res => {
             if (res.data.resultCode === "RESULT_SUCCESS") {
               this.showSnackbar("删除成功，请注意审核", "success");
+              debugger;
               this.getTable();
             } else {
               this.showSnackbar(res.data.message, "error");
@@ -399,6 +403,7 @@ export default {
           .then(res => {
             if (res.data.resultCode === "RESULT_SUCCESS") {
               this.showSnackbar("删除成功，请注意审核", "success");
+              debugger;
               this.getTable();
             } else {
               this.showSnackbar(res.data.message, "error");
@@ -417,7 +422,7 @@ export default {
       tableData: [],
       headers: [
         { text: "序号", value: "no", align: "center" },
-        { text: "码表编号", value: "codetableEname", align: "center" },
+        { text: "码表英文名", value: "codetableEname", align: "center" },
         { text: "码表中文名称", value: "codetableCname", align: "center" },
         { text: "审核状态", value: "isAuth", align: "center" },
         { text: "创建日期", value: "createTime", align: "center" },

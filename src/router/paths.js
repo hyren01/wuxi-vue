@@ -116,5 +116,5 @@ export default [
     name: 'standard-fileupload',
     component: () => import('@/pages/standardFileupload/StandardFileupload.vue')
   },
-
+ 
 ]

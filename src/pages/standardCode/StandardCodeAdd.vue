@@ -433,8 +433,8 @@ export default {
       maxScrollbarLength: 80,
     },
     rules: {
-      codetableCname: value => /^[\u4e00-\u9fa5]+$/.test(value) || "请填写中文",
-      codetableEname: value => (/^[A-Za-z0-9\_]+$/.test(value) &&　value.length <= 20) || "请填写不多于20个字符的英文或数字或下划线",
+      codetableCname: value => /^[A-Za-z0-9\_\u4e00-\u9fa5]+$/.test(value) || "请填写中文",
+      codetableEname: value => (/^[A-Za-z0-9\_]+$/.test(value) ) || "请填写英文或数字或下划线",
     },
     headers: [
       { text: '序号', value: 'no' },
@@ -775,9 +775,46 @@ export default {
       this.modelDialog3 = false
       this.modelDialog2 = true
     },
+    testEnglish(name) {
+      const reg = /^[A-Za-z0-9\_]+$/;
+      return reg.test(name);
+    },
+    testChinese(name) {
+      debugger;
+      const regs = /^[A-Za-z0-9\_\u4E00-\u9FA5\\s]+/;
+      return regs.test(name);
+    },
+    testnull(name) {
+      if (
+        name === "null" ||
+        name === null ||
+        name === "" ||
+        name === undefined ||
+        name === "undefined"
+      ) {
+        return false;
+      }
+      return true;
+    },
     saveCodeBtn() {
-      if (!this.$refs.form.validate()) {
+      if (!this.$refs.form.validate() || this.tableData.length == 0) {
+        this.showSnackbar("请先填写表单", "warning");
         return;
+      }
+      for (var i = 0; i < this.tableData.length; i++) {
+        var item = this.tableData[i];
+        if (!this.testnull(item.codeCname)) {
+          this.showSnackbar("代码中文名不能为空", "error");
+          return;
+        }
+        if (!this.testnull(item.codeValue)) {
+          this.showSnackbar("代码值不能为空", "error");
+          return;
+        }
+        if (!this.testChinese(item.codeCname)) {
+          this.showSnackbar("代码中文名请输入中文", "error");
+          return;
+        }
       }
       let arr = []
       this.tableData.forEach((item) => {
@@ -800,6 +837,13 @@ export default {
       obj.codeInfoList = arr
       obj.fieldCodeList = this.objId.concat(this.objsId)
       console.log(JSON.stringify(obj))
+      if (!this.testChinese(this.tableData[0].codetableCname)) {
+        this.showSnackbar("码表中文名请输入中文", "error");
+        return;
+      } else if (!this.testEnglish(this.tableData[0].codetableEname)) {
+        this.showSnackbar("码表英文名请输入英文", "error");
+        return;
+      }
       this.$nohttps
         .post('/codeinfo/saveCodeInfo?isadd=1&batchNo=' + this.batchNo, obj)
         .then((res) => {

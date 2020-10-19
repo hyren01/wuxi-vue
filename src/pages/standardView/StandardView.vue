@@ -49,7 +49,7 @@
               <!-- <v-btn color="primary" @click.stop="addToDbModel = true">
                 导入数据库
                 <v-icon right>mdi-plus</v-icon>
-              </v-btn> -->
+              </v-btn>-->
               <v-btn color="primary" @click="exportToExcel">
                 excel模板下载
                 <v-icon right>mdi-plus</v-icon>
@@ -66,7 +66,7 @@
                 :btnTxt="'excel导入'"
                 :token="parenttoken"
               />
-
+              <v-btn color="info" @click="exportToExcel2">导出标准</v-btn>
               <v-dialog v-model="addToDbModel" max-width="500">
                 <v-widget title="选择数据库">
                   <div slot="widget-content">
@@ -256,9 +256,9 @@
 
                             <td class="px-1">
                               <v-edit-dialog lazy>
-                                {{ props.item.definition }}
+                                {{ props.item.defination }}
                                 <template v-slot:input>
-                                  <v-text-field clearable v-model="props.item.definition"></v-text-field>
+                                  <v-text-field clearable v-model="props.item.defination"></v-text-field>
                                 </template>
                               </v-edit-dialog>
                             </td>
@@ -586,6 +586,21 @@
                   <td>{{ props.item.count }}</td>
                   <!-- 表格操作 -->
                   <td nowrap>
+                     <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          flat
+                          icon
+                          class="ma-0"
+                          color="info"
+                          v-on="on"
+                          @click="preview(props.item)"
+                        >
+                          <v-icon>mdi-file-eye-outline</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>查看</span>
+                    </v-tooltip>
                     <v-tooltip bottom v-if="props.item.isAuth != '3'">
                       <template v-slot:activator="{ on }">
                         <v-btn
@@ -601,21 +616,7 @@
                       </template>
                       <span>查看历史版本</span>
                     </v-tooltip>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on }">
-                        <v-btn
-                          flat
-                          icon
-                          class="ma-0"
-                          color="info"
-                          v-on="on"
-                          @click="preview(props.item)"
-                        >
-                          <v-icon>mdi-file-eye-outline</v-icon>
-                        </v-btn>
-                      </template>
-                      <span>查看</span>
-                    </v-tooltip>
+                   
                     <v-tooltip bottom v-if="props.item.isAuth != '3'">
                       <template v-slot:activator="{ on }">
                         <v-btn
@@ -928,7 +929,7 @@ export default {
       },
       {
         text: "定义",
-        value: "definition"
+        value: "defination"
       },
       {
         text: "数据类型 *",
@@ -987,9 +988,12 @@ export default {
     },
     stepVal: 1,
     rules: {
-      cnName: value => /^[\u4e00-\u9fa5]+$/.test(value) || "请填写中文",
-      enName: value => (/^[A-Za-z0-9\_]+$/.test(value) &&　value.length <= 20) || "请填写不多于20个字符的英文或数字或下划线",
-      code: value => /^[A-Za-z0-9\_]+$/.test(value) || "请填写英文或数字或下划线",
+      cnName: value =>
+        /^[\u4e00-\u9fa5A-Za-z0-9\_]+$/.test(value) || "请填写中文",
+      enName: value =>
+        /^[A-Za-z0-9\_]+$/.test(value) || "请填写英文或数字或下划线",
+      code: value =>
+        /^[A-Za-z0-9\_]+$/.test(value) || "请填写英文或数字或下划线"
     },
     snackbar: {
       show: false,
@@ -1019,7 +1023,7 @@ export default {
       },
       {
         text: "定义",
-        value: "definition"
+        value: "defination"
       },
       {
         text: "数据类型 *",
@@ -1054,7 +1058,7 @@ export default {
       enName: "",
       cnName: "",
       code: "",
-      definition: "",
+      defination: "",
       type: "字符串",
       maxsize: 0,
       range: 0,
@@ -1141,34 +1145,38 @@ export default {
         name: "name"
       };
       this.$nohttps
-        .post("/category/getAllCategory").then(response => {
-          const data = JSON.parse(JSON.stringify(response.data.data)).sort((a, b) => a.pxh - b.pxh);;
+        .post("/category/getAllCategory")
+        .then(response => {
+          const data = JSON.parse(JSON.stringify(response.data.data)).sort(
+            (a, b) => a.pxh - b.pxh
+          );
           console.log(data);
           this.newfolderItems = toTreeData(data, attr);
           console.log(this.newfolderItems);
           this.treeData = dealChildren(this.newfolderItems);
-          this.category_id = '0'
+          this.category_id = "0";
           this.getTableList();
         })
-        .catch(function(error) {
-        });
+        .catch(function(error) {});
     },
     //查找列表
     getTableList() {
       let category = this.newcategory.id;
       var obj = {
-            categoryId: category,
-            pagenum: this.pagination.page,
-            size: this.pagination.rowsPerPage
-      }
+        key: this.search,
+        categoryId: category,
+        pagenum: this.pagination.page,
+        size: this.pagination.rowsPerPage
+      };
       this.$nohttps
-        .post("/newstandard/getStandardListByPage",obj)
+        .post("/newstandard/getStandardListByPage", obj)
         .then(res => {
+          
           var data = [];
-          if(res.data.operStandardList != null){
+          if (res.data.operStandardList != null) {
             data = res.data.operStandardList;
           }
-          
+
           let count = res.data.count;
           this.brands = data;
           this.totalBrands = count;
@@ -1187,6 +1195,7 @@ export default {
     },
     // 上传成功
     uploadComplete(msg) {
+      debugger;
       this.showSnackbar(msg, "success");
       this.getTableList();
     },
@@ -1196,6 +1205,9 @@ export default {
     },
     exportToExcel() {
       window.open("/stdglprj/newstandard/getExcelTemp");
+    },
+    exportToExcel2() {
+      window.open("/stdglprj/newstandard/exportStandardToExcel");
     },
     //导入数据库模态框，确定按钮
     confirmAddToDbButton() {
@@ -1233,12 +1245,12 @@ export default {
     //搜索
     handleSearch() {
       var obj = {
-            key: this.search,
-            pagenum: this.currpage,
-            size: this.pagesize
-      }
+        key: this.search,
+        pagenum: this.currpage,
+        size: this.pagesize
+      };
       this.$nohttps
-        .post("/newstandard/searchStandard",obj)
+        .post("/newstandard/searchStandard", obj)
         .then(res => {
           let data = res.data.operStandardList;
           for (let j = 0; j < data.length; j++) {
@@ -1390,19 +1402,26 @@ export default {
             this.tableData1 = res.data.data[0].standardField;
           }
         })
-        .catch(error => {
-        });
+        .catch(error => {});
     },
     // 批量删除按钮
     deleteDialogShow(deleteTitle, deleteText, item) {
       this.arr = [];
+      let flag = false;
       this.selected.forEach(value => {
         let obj = {};
         obj.id = value.id;
         obj.batchNo = value.batchNo;
         obj.isAuth = value.isAuth;
+        if(value.isAuth == '3'){
+          flag = true;
+        }
         this.arr.push(obj);
       });
+      if(flag){
+        this.showSnackbar("待审核的标准不能删除", "warning");
+        return;
+      }
       this.deleteTitle = deleteTitle;
       this.deleteText = deleteText;
       let _this = this;
@@ -1478,8 +1497,7 @@ export default {
             this.getTableList();
           }
         })
-        .catch(error => {
-        });
+        .catch(error => {});
     },
     // 编辑
     editItem(item) {
@@ -1507,6 +1525,30 @@ export default {
     close() {
       this.modelDialog = false;
     },
+    testEnglish(name) {
+      const reg = /^[A-Za-z0-9\_]+$/;
+      return reg.test(name);
+    },
+    testnumber(name) {
+      const reg = /^[0-9]+$/;
+      return reg.test(name);
+    },
+    testChinese(name) {
+      const regs = /[A-Za-z0-9\_\u4E00-\u9FA5\\s]+/;
+      return regs.test(name);
+    },
+    testnull(name) {
+      if (
+        name === "null" ||
+        name === null ||
+        name === "" ||
+        name === undefined ||
+        name === "undefined"
+      ) {
+        return false;
+      }
+      return true;
+    },
     finish() {
       // 没有复合型字段
       let data = new Object({
@@ -1519,7 +1561,62 @@ export default {
         standardField: [],
         standardObject: []
       });
+      
+      if (this.editedItem.property.length == 0) {
+        this.showSnackbar("属性为空，请新增属性", "error");
+        return;
+      }
       for (let a of this.editedItem.property) {
+        if (!this.testnull(a.enName)) {
+          this.showSnackbar("英文名不能为空，请填写", "error");
+          return;
+        }
+        if (!this.testnull(a.cnName)) {
+          this.showSnackbar("中文名不能为空，请填写", "error");
+          return;
+        }
+        if (!this.testnull(a.code)) {
+          this.showSnackbar("短名不能为空，请填写", "error");
+          return;
+        }
+        if (!this.testnull(a.maxsize)) {
+          this.showSnackbar("长度不能为空，请填写", "error");
+          return;
+        }
+        if (!this.testnull(a.maxCount)) {
+          this.showSnackbar("最大出现次数不能为空，请填写", "error");
+          return;
+        }
+        if (!this.testnull(a.range)) {
+          this.showSnackbar("值域不能为空，请填写", "error");
+          return;
+        }
+
+        // if (!this.testEnglish(a.cnName)) {
+        //   this.showSnackbar("中文名请输入中文", "error");
+        //   return;
+        // }
+        if (!this.testChinese(a.name)) {
+          this.showSnackbar("标准英文名请输入英文", "error");
+          return;
+        }
+        if (!this.testEnglish(a.code)) {
+          this.showSnackbar("短名请输入英文，请填写", "error");
+          return;
+        }
+        if (!this.testnumber(a.maxsize)) {
+          this.showSnackbar("字段长度请输入数字", "error");
+          return;
+        }
+        if (!this.testnumber(a.maxCount)) {
+          this.showSnackbar("最大出现次数请输入数字", "error");
+          return;
+        }
+        if (!this.testnumber(a.range)) {
+          this.showSnackbar("范围请输入数字", "error");
+          return;
+        }
+
         data.standardField.push(
           new Object({
             enName: a.enName, //字段英文名称       1
@@ -1541,12 +1638,13 @@ export default {
           if (res.data.message === "获取信息成功") {
             this.showSnackbar("新增成功", "success");
           }
+          this.getTableList();
+          this.modelDialog = false;
         })
         .catch(error => {
+          this.modelDialog = false;
           this.showSnackbar(error, "error");
         });
-      this.modelDialog = false;
-      this.getTableList();
     },
     addProperty() {
       this.editedItem.property.push(Object.assign({}, this.defaultProperty));
@@ -1562,15 +1660,15 @@ export default {
         this.stepVal = 2;
       }
     },
-    //判断英文名
-    testEnglish(name) {
-      const reg = /^[A-Za-z0-9\-]+$/;
-      return reg.test(name);
-    },
-    testChinese(name) {
-      const regs = /[\u4E00-\u9FA5\\s]+/;
-      return regs.test(name);
-    },
+    // //判断英文名
+    // testEnglish(name) {
+    //   const reg = /^[A-Za-z0-9\_]+$/;
+    //   return reg.test(name);
+    // },
+    // testChinese(name) {
+    //   const regs = /[\u4E00-\u9FA5\\s]+/;
+    //   return regs.test(name);
+    // },
     typeSelectChanged(event) {
       this.editedItem.property = [];
     },

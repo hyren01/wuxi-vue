@@ -234,12 +234,14 @@ import VWidget from "@/components/VWidget";
 import qs from "qs";
 import TreeSelect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+import loading from "@/components/loading"
 
 export default {
   name: "standar-detection",
   components: {
     TreeSelect,
-    VWidget
+    VWidget,
+    loading
   },
   data: () => ({
     loadingsave: false,
@@ -478,6 +480,10 @@ export default {
     savemessageBtn() {
       let id = this.$route.query.id;
       let category = this.category_id;
+      if(!category){
+        this.showSnackbar("请选择目录","warning");
+        return;
+      }
       this.loadingsave = true;
 
       this.$https

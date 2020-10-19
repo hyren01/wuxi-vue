@@ -56,12 +56,15 @@ module.exports = {
       },
       '/stdglprj': {
         //target: 'http://139.9.126.19:8083',
-        target: 'http://127.0.0.1:8080',
+        // target: 'http://127.0.0.1:8080',
+        target: 'http://172.16.35.245:8080',
+        // target: 'http://10.1.22.190:8080/',
         changeOrigin: true
       },
       '/cms': {
-        //target: 'http://172.16.45.227:9000', // 6a
-        target: 'http://172.16.35.250:9000', // x86
+        target: 'http://172.16.35.160:9000',
+        // target: 'http://172.16.45.227:9000', // 6a
+        //target: 'http://172.16.35.250:9000', // x86
         changeOrigin: true
       },
       '/usmm': {

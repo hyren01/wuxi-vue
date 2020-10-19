@@ -60,7 +60,7 @@ export default {
       console.log(data);
       if(data && data.length){
         this.reData = data.map(item => {
-          item.enName = '为空数：{' + item.nullNum + '}, 字段长度大于：{' + item.overLenNum + '}, 码值不符合：{' + item.notInCodeNum +'}'
+          item.enName = '为空数：' + item.nullNum + ', 字段长度大于：' + item.overLenNum + ', 码值不符合：' + item.notInCodeNum 
           return item
         })
       }

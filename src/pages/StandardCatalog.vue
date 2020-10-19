@@ -33,7 +33,7 @@
           <div slot="widget-content" style="min-height:400px">
             <v-card-title>
               <div style="margin-left:50%">
-                <v-btn color="primary" @click="add()">新增</v-btn>
+                <v-btn color="primary" @click="add()">清空</v-btn>
                 <v-btn color="primary" @click="del()">删除</v-btn>
                 <v-btn color="primary" @click="save()">保存</v-btn>
               </div>
@@ -89,6 +89,7 @@
                       </v-layout>
                     </v-container>
                   </v-form>
+                  <div>*新增和编辑均在点击保存按钮后提交数据</div>
                 </div>
               </v-flex>
             </v-card-title>
@@ -116,7 +117,7 @@ export default {
     users: [],
     open: [],
     testparentId: "",
-    hTitle: "新增目录",
+    hTitle: "目录管理",
     category: {
       id: "",
       name: "",

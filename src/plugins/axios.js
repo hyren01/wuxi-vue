@@ -53,9 +53,10 @@ jsonAxios.interceptors.request.use(
 )
 
 
+
 Vue.prototype.$nohttps = nohttps
 Vue.prototype.$https = https
 Vue.prototype.$jsonAxios = jsonAxios
-
-Vue.use(axios)
+Vue.prototype.$axios = axios
+// Vue.use(axios)
 

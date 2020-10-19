@@ -40,7 +40,7 @@
                     <v-btn color="grey" flat @click="deleteDialog = false"
                       >取消</v-btn
                     >
-                    <v-btn color="error" flat @click="deleteMutipleItem"
+                    <v-btn color="error" flat :loading="deleteloading" @click="deleteMutipleItem"
                       >删除</v-btn
                     >
                   </v-card-actions>
@@ -263,10 +263,12 @@ export default {
     },
     //删除模态框里的删除按钮
     async deleteMutipleItem() {
+      this.deleteloading = true;
       const res = await this.$nohttps.post(
         '/docmodel/delfile',
         this.singleDeleteItem
       )
+      this.deleteloading = false;
       if (res.data.resultCode === 'RESULT_SUCCESS') {
         this.showSnackbar('删除成功', 'success')
         this.getTableList()
@@ -378,6 +380,7 @@ export default {
       parenttoken: {
         'scistor-token': '',
       },
+      deleteloading: false,
     }
   },
 

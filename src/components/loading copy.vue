@@ -15,12 +15,6 @@ export default {
   name: "loading",
   data() {
     return {
-     searchObj: {},
-      user: "",
-      password: "",
-      userToken: "",
-      temp: null,
-      testresult: "",
       dataForm: {
         tokenid: "",
         syscode: ""
@@ -38,58 +32,55 @@ export default {
         '/cms/loginByTokenid', 
         this.dataForm
       );
-      console.log("单点登录成功");
-      console.log("res:"+res);
       const data = res.data.data
       this.userToken = data.tokenInfo
-      console.log("userToken:"+userToken);
       this.changeLogin({
         Authorization: this.userToken,
         "scistor-token": this.userToken
       });
-      console.log("data.userInfo.cmsApp:"+data.userInfo.cmsApp);
-      this.$store.commit('setSouterList', data.userInfo.cmsApp);
-      this.$router.push("/standard/sv");
+      this.$store.commit('setSouterList', data.userInfo.cmsApp)
+      vm.$router.push({ path: "/catalog/fileUpload" });
     },
   },
   created() {
     console.log("进入loading.vue的created方法");
     const paramList = location.search.slice(1).split('&')
-    
+    const searchObj = {}
     paramList.map(item => {
       const target = item.split('=')
       if(target.length){
-        this.searchObj[target[0]] = target[1]
+        searchObj[target[0]] = target[1]
       }
     })
-    this.dataForm.tokenid = this.searchObj.tokenid || ''
-    this.dataForm.syscode = this.searchObj.syscode || ''
+    this.dataForm.tokenid = searchObj.tokenid || ''
+    this.dataForm.syscode = searchObj.syscode || ''
     console.log("dataForm:"+this.dataForm);
     console.log("this.dataForm.tokenid:"+this.dataForm.tokenid);
     console.log("this.dataForm.syscode:"+this.dataForm.syscode);
-       
-    if (!this.searchObj.tokenid) {
-      this.$router.push('/login')
+    
+    
+    if (!searchObj.tokenid) {
+      // this.$router.push('/login')
       console.log('进入本地登陆')
-      this.flag = 'local'
+      // this.flag = 'local'
     } else {
       console.log('进入赛斯登陆')
-      this.login();
+      // this.login();
     }
-    // if(this.$route.query.tokenid) this.dataForm.tokenid = this.$route.query.tokenid;
-    // if(this.$route.query.syscode) this.dataForm.syscode = this.$route.query.syscode;
-    // console.log("this.$route.query.tokenid："+this.$route.query.tokenid);
-    // console.log("this.$route.query.syscode"+this.$route.query.syscode);
+    if(this.$route.query.tokenid) this.dataForm.tokenid = this.$route.query.tokenid;
+    if(this.$route.query.syscode) this.dataForm.syscode = this.$route.query.syscode;
+    console.log("this.$route.query.tokenid："+this.$route.query.tokenid);
+    console.log("this.$route.query.syscode"+this.$route.query.syscode);
 
-    // if (!this.$route.query.tokenid) {
-    //   // this.$router.push({
-    //   //   path: "/login"
-    //   // });
-    //   console.log("获取到tokenid");
-    // } else {
-    //   console.log("未获取到tokenid");
-    //   // this.login();
-    // } 
+    if (!this.$route.query.tokenid) {
+      // this.$router.push({
+      //   path: "/login"
+      // });
+      console.log("获取到tokenid");
+    } else {
+      console.log("未获取到tokenid");
+      // this.login();
+    } 
   },
 };
 </script>

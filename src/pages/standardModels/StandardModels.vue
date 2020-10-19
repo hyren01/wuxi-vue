@@ -88,30 +88,21 @@
                 </td>
               </template>
               <template v-slot:no-results>
-                <v-alert
-                  :value="true"
-                  color="error"
-                  icon="warning"
-                > "{{ search }}" 找不到匹配的值.</v-alert>
+                <v-alert :value="true" color="error" icon="warning">"{{ search }}" 找不到匹配的值.</v-alert>
               </template>
             </v-data-table>
             <!-- 数据检测模态框 -->
             <v-dialog v-model="dataCheckShow" style="background:#fff;" max-width="600px" persistent>
               <v-card>
-                <v-card-title class="headline info--text">选择系统</v-card-title>
+                <v-card-title class="headline info--text">选择系统（模型所在数据源）</v-card-title>
                 <v-divider></v-divider>
                 <v-card-text>
                   <v-flex md12>
-                    <v-combobox
-                      v-model="dbName"
-                      :items="dbList"
-                      label="请选择"
-                      @change="select"
-                    ></v-combobox>
-                    <v-btn color="primary" @click="doDataCheck(tableData.item)">确认检测</v-btn>
+                    <v-combobox v-model="dbName" :items="dbList" label="请选择" @change="select"></v-combobox>
+                    <v-btn color="primary" :loading="loading" @click="doDataCheck(tableData.item)">确认检测</v-btn>
                   </v-flex>
                   <v-layout row wrap justify-end>
-                    <v-btn flat @click="close">取消</v-btn>
+                    <v-btn flat  @click="close">取消</v-btn>
                   </v-layout>
                 </v-card-text>
               </v-card>
@@ -176,7 +167,6 @@ export default {
       if (this.selected.length === 0) {
         this.showSnackbar("请选择数据进行检测", "error");
       } else {
-
         this.selected.forEach(item => {
           console.log(item.moudleId);
           this.$nohttps
@@ -207,12 +197,12 @@ export default {
       this.dbInfo.checkTableId = item.moudleId;
       this.dbInfo.checkTableName = item.moudleCode;
       this.dataCheckShow = true;
-      
-      let obj = {}
-      obj.schemaCode = item.enName
-      obj.moudleId = item.moudleId
+
+      let obj = {};
+      obj.schemaCode = item.enName;
+      obj.moudleId = item.moudleId;
       this.$nohttps
-        .post("/checkmoudle/getDbList",obj)
+        .post("/checkmoudle/getDbList", obj)
         .then(res => {
           let data = res.data.data;
           this.allDbList = data;
@@ -225,41 +215,33 @@ export default {
         });
     },
     close() {
+      this.dbName = "";
       this.dataCheckShow = false;
     },
     doDataCheck() {
+      this.loading = true;
       this.$nohttps
-        .post(
-          "/checkmoudle/getDataCheck",
-          this.dbInfo
-        )
+        .post("/checkmoudle/getDataCheck", this.dbInfo)
         .then(res => {
           let data = res.data.data;
           this.$router.push({
-          name: "standard-models-datacheck",
-          params: {
-            data: data
-            // [
-            //   {
-            //     id: '123456',
-            //     name: '测试',
-            //     nullNum: 0,
-            //     overLenNum: 1,
-            //     notInCodeNum: null,
-            //   }
-            // ]
-          }
-        });
+            name: "standard-models-datacheck",
+            params: {
+              data: data
+            }
+          });
         })
         .catch(err => {
-          this.showSnackbar("REST服务失败", "error");
-        });
+          this.showSnackbar(err, "error");
+          this.loading = false;
+        })
+        .finally(_ => (this.loading = false));
     },
     select(value) {
       this.allDbList.forEach(item => {
         if (item.sysName == value) {
           this.dbInfo.sysName = value;
-          this.dbInfo.driver=item.dbDriver;
+          this.dbInfo.driver = item.dbDriver;
           this.dbInfo.dbUrl = item.dbUrl;
           this.dbInfo.dbName = item.dbName;
           this.dbInfo.dbUsername = item.dbUsername;
@@ -293,7 +275,7 @@ export default {
       dbList: [],
       dbInfo: {
         sysName: "",
-        driver:"",
+        driver: "",
         dbName: "",
         dbUrl: "",
         dbUsername: "",
@@ -301,7 +283,7 @@ export default {
         checkTableId: "",
         checkTableName: ""
       },
-      
+      loading: false
     };
   },
   mounted() {

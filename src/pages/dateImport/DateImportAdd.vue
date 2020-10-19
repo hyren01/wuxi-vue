@@ -110,7 +110,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="grey" flat @click="saveDialog = false">取消</v-btn>
-          <v-btn color="primary" flat @click="must">确定</v-btn>
+          <v-btn color="primary" flat :loading="Loading" @click="must">确定</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -184,10 +184,10 @@
           </v-layout>
           <v-layout row wrap>
             <v-spacer></v-spacer>
-            <v-btn flat @click="closeSet">取消</v-btn>
+            <v-btn flat :loading="loadingflag" @click="closeSet">取消</v-btn>
             <!-- <v-btn color="primary"
                    @click="testCheck">测试连接</v-btn> -->
-            <v-btn color="success" @click="okSetData">确认</v-btn>
+            <v-btn color="success" :loading="loadingflag" @click="okSetData">确认</v-btn>
           </v-layout>
         </v-container>
       </v-form>
@@ -230,10 +230,13 @@
 <script>
 import qs from 'qs'
 import VWidget from '@/components/VWidget'
+import loading from "@/components/loading"
+
 export default {
   name: 'standar-detection',
   components: {
     VWidget,
+    
   },
   data() {
     return {
@@ -247,6 +250,7 @@ export default {
       objjj: {},
       dbShow: false,
       modeltable: false,
+      loadingflag: false,
       dbHeaders: [
         { text: '数据库名称', value: 'db_name' },
         { text: '数据库类型', value: 'db_type' },
@@ -290,6 +294,7 @@ export default {
       saveTitle: '保存',
       saveText: '确定保存这些表吗?',
       modol: 'false',
+      Loading: false,
     }
   },
   methods: {
@@ -309,10 +314,10 @@ export default {
     },
     //保存方法
     must() {
+      this.Loading = true;
       let params = JSON.stringify(this.finalyobj)
       // console.log(this.finalyobj);
       // console.log(this.modol)
-      this.saveDialog = false
       if (this.modol == 'false') {
         this.$https
           .post(
@@ -333,10 +338,12 @@ export default {
           .catch((err) => {
             this.showSnackbar('REST服务失败', 'error')
           })
+           .finally(_ => (this.Loading = false));
       } else {
         this.showSnackbar('短名重复 请修改', 'error')
-        this.saveDialog = false
       }
+      this.Loading = false;
+      this.saveDialog = false;
     },
     // 选择数据库按钮
     setDataSource() {
@@ -346,7 +353,7 @@ export default {
     okSetData() {
       if (this.$refs.form.validate()) {
         this.dbData = JSON.parse(JSON.stringify(this.modelData))
-        this.modelDialog = false
+        this.loadingflag = true;
         this.sList = []
         this.sName = ''
         this.getTableList()
@@ -373,10 +380,11 @@ export default {
       // console.log(params);
       // params.insname = params.dbname;
       // this.axios.defaults.headers.post['Content-Type'] = "application/x-www-form-urlencoded;charset=UTF-8";
-
+      
       this.$https
         .post('/operModule/getDbTableInfo/', qs.stringify({ db: params }))
         .then((res) => {
+          
           // console.log(res.data.data)
           let arr = res.data.data[0].less_name
           let arr1 = res.data.data[0].table_cname
@@ -391,6 +399,8 @@ export default {
         .catch((err) => {
           this.showSnackbar('REST服务失败', 'error')
         })
+         .finally(_ => (this.loadingflag = false))
+         .finally(_ => (this.modelDialog = false))
     },
     // 保存按钮
     finish() {

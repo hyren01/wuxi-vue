@@ -196,24 +196,41 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.path === '/#/') {
-    next()
-  } else {
-    let token = sessionStorage.getItem('Authorization')
-    if (token === 'null' || token === '') {
-      next('/#/')
-    } else {
-      NProgress.start()
-      if(!store.state.routerList.length){
-        const menu = JSON.parse(localStorage.getItem('menu'))
-        if(menu &&　menu.length){
-          store.commit('setSouterList', menu)
-          next({...to, replace: true})
-        }
+  let token = sessionStorage.getItem('Authorization')
+  
+  if (token) {
+    NProgress.start()
+    if (!store.state.routerList.length) {
+      const menu = JSON.parse(localStorage.getItem('menu'))
+      if (menu && menu.length) {
+        store.commit('setSouterList', menu)
+        next({ ...to, replace: true })
       }
-      next()
+    }
+  } else {
+    if (to.path !== '/') {
+      next('/')
     }
   }
+  next()
+  // if (to.path === '/#/') {
+  //   next()
+  // } else {
+  //   let token = sessionStorage.getItem('Authorization')
+  //   if (token === 'null' || token === '') {
+  //     next('/#/')
+  //   } else {
+  //     NProgress.start()
+  //     if(!store.state.routerList.length){
+  //       const menu = JSON.parse(localStorage.getItem('menu'))
+  //       if(menu &&　menu.length){
+  //         store.commit('setSouterList', menu)
+  //         next({...to, replace: true})
+  //       }
+  //     }
+  //     next()
+  //   }
+  // }
 })
 router.afterEach(() => {
   // ...

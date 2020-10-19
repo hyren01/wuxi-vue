@@ -176,9 +176,17 @@
                 </v-widget>
               </v-dialog>
               <v-form ref="form" lazy-validation class="formStyle">
-                <v-text-field :rules="[rules.codetableCname]" v-model="codetableCname" label="码表中文名 *"></v-text-field>
+                <v-text-field
+                  :rules="[rules.codetableCname]"
+                  v-model="codetableCname"
+                  label="码表中文名 *"
+                ></v-text-field>
                 <v-spacer></v-spacer>
-                <v-text-field :rules="[rules.codetableEname]" v-model="codetableEname" label="码表英文名 *"></v-text-field>
+                <v-text-field
+                  :rules="[rules.codetableEname]"
+                  v-model="codetableEname"
+                  label="码表英文名 *"
+                ></v-text-field>
                 <v-spacer></v-spacer>
                 <v-text-field v-model="remarks" label="备注"></v-text-field>
               </v-form>
@@ -329,8 +337,9 @@ export default {
     tableData: [],
     tableData1: [],
     rules: {
-      codetableCname: value => /^[\u4e00-\u9fa5]+$/.test(value) || "请填写中文",
-      codetableEname: value => (/^[A-Za-z0-9\_]+$/.test(value) &&　value.length <= 20) || "请填写不多于20个字符的英文或数字或下划线",
+      codetableCname: value => /^[A-Za-z0-9\_\u4e00-\u9fa5]+$/.test(value) || "请填写中文",
+      codetableEname: value =>
+        /^[A-Za-z0-9\_]+$/.test(value) || "请填写英文或数字或下划线"
     },
     reData2: [],
     reData3: [],
@@ -477,17 +486,45 @@ export default {
       this.modelDialog2 = false;
     },
     testEnglish(name) {
-      const reg = /^[A-Za-z0-9\-]+$/;
+      const reg = /^[A-Za-z0-9\_]+$/;
       return reg.test(name);
     },
     testChinese(name) {
-      const regs = /[\u4E00-\u9FA5\\s]+/;
+      const regs = /[A-Za-z0-9\_\u4E00-\u9FA5\\s]+/;
       return regs.test(name);
     },
+    testnull(name) {
+      if (
+        name === "null" ||
+        name === null ||
+        name === "" ||
+        name === undefined ||
+        name === "undefined"
+      ) {
+        return false;
+      }
+      return true;
+    },
     saveCodeBtn() {
-      if (!this.$refs.form.validate()) {
-        // this.showSnackbar("请先填写表单", "warning");
+      console.log(this.tableData);
+      if (!this.$refs.form.validate() || this.tableData.length == 0) {
+        this.showSnackbar("请先填写表单", "warning");
         return;
+      }
+      for (var i = 0; i < this.tableData.length; i++) {
+        var item = this.tableData[i];
+        if (!this.testnull(item.codeCname)) {
+          this.showSnackbar("代码中文名不能为空", "error");
+          return;
+        }
+        if (!this.testnull(item.codeValue)) {
+          this.showSnackbar("代码值不能为空", "error");
+          return;
+        }
+        if (!this.testChinese(item.codeCname)) {
+          this.showSnackbar("代码中文名请输入中文", "error");
+          return;
+        }
       }
       let arr = [];
       let obj = {};
@@ -502,12 +539,12 @@ export default {
       });
       obj.codeInfoList = arr;
       obj.fieldCodeList = this.fieldCodeList;
-      if (this.testChinese(this.tableData.codetableCname)) {
+      if (!this.testChinese(this.tableData[0].codetableCname)) {
         this.showSnackbar("码表中文名请输入中文", "error");
+        return;
       } else if (!this.testEnglish(this.tableData[0].codetableEname)) {
         this.showSnackbar("码表英文名请输入英文", "error");
-      } else if (!this.testChinese(this.tableData[0].codeCname)) {
-        this.showSnackbar("代码中文名请输入中文", "error");
+        return;
       } else {
         this.$nohttps
           .post("/codeinfo/saveCodeInfo?isadd=0&batchNo", obj)
@@ -540,10 +577,10 @@ export default {
 </script>
 
 <style scoped>
-.formStyle{
+.formStyle {
   display: flex;
 }
-.spacer{
-    width: 20px
-  }
+.spacer {
+  width: 20px;
+}
 </style>
